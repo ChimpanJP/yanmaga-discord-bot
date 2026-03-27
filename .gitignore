@@ -1,0 +1,18 @@
+# デバッグ用一時ファイル
+debug_*.py
+debug_*.html
+debug_*.txt
+debug_*.png
+page_source.html
+scraper_*.txt
+import_test.txt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# 環境変数ファイル
+.env
