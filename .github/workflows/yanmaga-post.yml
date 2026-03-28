@@ -10,16 +10,10 @@ on:
 
   # 手動実行ボタン（テスト用）
   workflow_dispatch:
-    inputs:
-      debug:
-        description: 'デバッグ出力を有効にする'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   post-yanmaga:
-    name: スクレイプ & Discord投稿
+    name: Discord投稿
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     permissions:
@@ -42,17 +36,10 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # 4. Playwright ブラウザをインストール
-      - name: 🌐 Playwright Chromium をインストール
-        run: |
-          playwright install chromium
-          playwright install-deps chromium
-
-      # 5. スクレイパーを実行
+      # 4. スクレイパーを実行
       - name: 🚀 スクレイパーを実行
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          DEBUG: ${{ github.event.inputs.debug == 'true' && 'true' || '' }}
         run: |
           python scraper.py
 
