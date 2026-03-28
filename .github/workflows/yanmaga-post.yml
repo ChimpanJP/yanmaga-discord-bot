@@ -28,11 +28,6 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: 🌐 Playwright Chromium をインストール
-        run: |
-          playwright install chromium
-          playwright install-deps chromium
-
       - name: 🚀 スクレイパーを実行
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
