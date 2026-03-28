@@ -2,49 +2,43 @@ name: ヤンマガWeb → Discord 毎日投稿
 # GitHub Actions ワークフロー登録用
 
 on:
-  # ========================================
-  # JST 0:01 = UTC 15:01（前日）
-  # cron は UTC 基準。 "1 15 * * *"
-  # ========================================
   schedule:
     - cron: '1 15 * * *'
-
-  # 手動実行ボタン（テスト用）
   workflow_dispatch:
 
 jobs:
   post-yanmaga:
     name: Discord投稿
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       contents: read
 
     steps:
-      # 1. リポジトリをチェックアウト
       - name: 📥 リポジトリをチェックアウト
         uses: actions/checkout@v4.2.2
 
-      # 2. Python セットアップ
       - name: 🐍 Python 3.11 をセットアップ
         uses: actions/setup-python@v5.6.0
         with:
           python-version: '3.11'
           cache: 'pip'
 
-      # 3. 依存パッケージをインストール
       - name: 📦 依存パッケージをインストール
         run: |
           pip install -r requirements.txt
 
-      # 4. スクレイパーを実行
+      - name: 🌐 Playwright Chromium をインストール
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
+
       - name: 🚀 スクレイパーを実行
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           python scraper.py
 
-      # 6. エラー時にも Discord へ通知（オプション）
       - name: ❌ 失敗時 Discord 通知
         if: failure()
         env:
@@ -53,19 +47,11 @@ jobs:
           python - <<'EOF'
           import os, httpx, asyncio
           from datetime import datetime, timezone
-
           async def notify():
               url = os.environ.get("DISCORD_WEBHOOK_URL", "")
               if not url:
                   return
               async with httpx.AsyncClient() as client:
-                  await client.post(url, json={
-                      "embeds": [{
-                          "title": "🚨 ヤンマガBot エラー発生",
-                          "description": "GitHub Actions ワークフローが失敗しました。\nActions ログを確認してください。",
-                          "color": 0xFF0000,
-                          "timestamp": datetime.now(timezone.utc).isoformat(),
-                      }]
-                  })
+                  await client.post(url, json={"embeds": [{"title": "🚨 ヤンマガBot エラー発生","description": "ワークフローが失敗しました。Actionsログを確認してください。","color": 0xFF0000,"timestamp": datetime.now(timezone.utc).isoformat()}]})
           asyncio.run(notify())
           EOF
